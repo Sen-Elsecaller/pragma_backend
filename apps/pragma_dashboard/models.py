@@ -267,139 +267,146 @@ class SaveFileUsuario(models.Model):
 
 
 class AnalisisIA(models.Model):
-	"""
-	Modelo para almacenar análisis generados por IA (N8N + Groq).
-	Contiene el análisis técnico para orientadores/psicólogos educacionales.
-	"""
-	sesion = models.OneToOneField(
-		SesionSimulacion,
-		on_delete=models.CASCADE,
-		related_name='analisis_ia'
+	NIVEL_RIESGO_CHOICES = [
+		('bajo', 'Bajo'),
+		('medio', 'Medio'),
+		('alto', 'Alto'),
+	]
+	
+	# Referencias a tablas externas (savefiles_usuario y usuarios)
+	savefile_id = models.IntegerField(
+		help_text="ID del savefiles_usuario",
+		db_index=True
 	)
-	usuario = models.ForeignKey(
-		User,
-		on_delete=models.CASCADE,
-		related_name='analisis_ia'
+	usuario_id = models.IntegerField(
+		help_text="ID del usuario (referencia externa)"
 	)
 	
-	# Puntuaciones y niveles
+	# Puntuación general
 	puntuacion_total = models.IntegerField(
-		validators=[MinValueValidator(0), MaxValueValidator(100)],
-		help_text="Puntuación global 0-100"
+		default=0,
+		help_text="Puntuación total (0-100)"
 	)
 	nivel_general = models.CharField(
 		max_length=50,
-		help_text="Nivel general: Excelente, Bueno, Regular, Necesita mejorar, Crítico"
+		default='Regular',
+		choices=[
+			('Excelente', 'Excelente'),
+			('Bueno', 'Bueno'),
+			('Regular', 'Regular'),
+			('Necesita mejorar', 'Necesita mejorar'),
+			('Crítico', 'Crítico'),
+		]
 	)
 	emoji_nivel = models.CharField(
 		max_length=10,
-		default='⚠️',
-		help_text="Emoji representativo del nivel"
+		default='⚠️'
 	)
 	
-	# Datos técnicos
-	datos_json = models.JSONField(
-		default=dict,
-		help_text="Análisis completo en JSON desde N8N"
-	)
-	
-	# Scores de competencias
+	# Scores de competencias (0-10)
 	score_velocidad = models.DecimalField(
 		max_digits=3,
 		decimal_places=1,
-		validators=[MinValueValidator(0), MaxValueValidator(10)],
-		default=0
+		default=0,
+		help_text="Score de velocidad de respuesta (0-10)"
 	)
 	score_precision = models.DecimalField(
 		max_digits=3,
 		decimal_places=1,
-		validators=[MinValueValidator(0), MaxValueValidator(10)],
-		default=0
+		default=0,
+		help_text="Score de precisión (0-10)"
 	)
 	score_consistencia = models.DecimalField(
 		max_digits=3,
 		decimal_places=1,
-		validators=[MinValueValidator(0), MaxValueValidator(10)],
-		default=0
+		default=0,
+		help_text="Score de consistencia (0-10)"
 	)
 	score_manejo_estres = models.DecimalField(
 		max_digits=3,
 		decimal_places=1,
-		validators=[MinValueValidator(0), MaxValueValidator(10)],
-		default=0
+		default=0,
+		help_text="Score de manejo de estrés (0-10)"
 	)
 	score_engagement = models.DecimalField(
 		max_digits=3,
 		decimal_places=1,
-		validators=[MinValueValidator(0), MaxValueValidator(10)],
-		default=0
+		default=0,
+		help_text="Score de engagement (0-10)"
 	)
 	
-	# Texto de análisis
+	# Análisis textual de Groq (como JSON strings)
 	resumen_fortalezas = models.TextField(
 		blank=True,
-		help_text="Resumen de fortalezas identificadas"
+		default='[]',
+		help_text="JSON array de fortalezas identificadas"
 	)
 	resumen_areas_mejora = models.TextField(
 		blank=True,
-		help_text="Resumen de áreas a mejorar"
+		default='[]',
+		help_text="JSON array de áreas de mejora"
 	)
 	resumen_recomendaciones = models.TextField(
 		blank=True,
-		help_text="Recomendaciones personalizadas"
+		default='[]',
+		help_text="JSON array de recomendaciones"
 	)
 	
 	# Indicadores de riesgo
 	nivel_riesgo = models.CharField(
 		max_length=20,
-		choices=[
-			('bajo', 'Bajo'),
-			('medio', 'Medio'),
-			('alto', 'Alto'),
-		],
-		default='bajo',
-		help_text="Nivel de riesgo detectado"
+		choices=NIVEL_RIESGO_CHOICES,
+		default='bajo'
 	)
 	alertas_psicologicas = models.TextField(
 		blank=True,
-		help_text="Alertas psicológicas detectadas"
+		default='Sin alertas'
 	)
 	requiere_intervencion = models.BooleanField(
 		default=False,
-		help_text="Indica si requiere intervención profesional"
+		help_text="Indica si se requiere intervención de psicólogo"
 	)
 	
 	# URLs de gráficos
 	url_grafico_distribucion = models.URLField(
 		blank=True,
-		help_text="URL del gráfico de distribución"
+		null=True
 	)
 	url_grafico_radar = models.URLField(
 		blank=True,
-		help_text="URL del gráfico radar de competencias"
+		null=True
 	)
 	url_grafico_indicadores = models.URLField(
 		blank=True,
-		help_text="URL del gráfico de indicadores clave"
+		null=True
+	)
+	
+	# Datos JSON completo de Groq
+	datos_json = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Respuesta completa de Groq"
 	)
 	
 	# Timestamps
 	fecha_analisis = models.DateTimeField(
 		auto_now_add=True,
-		help_text="Fecha del análisis"
+		help_text="Fecha/hora cuando se generó el análisis"
 	)
-	created_at = models.DateTimeField(auto_now_add=True)
-	updated_at = models.DateTimeField(auto_now=True)
-
+	created_at = models.DateTimeField(
+		auto_now_add=True
+	)
+	updated_at = models.DateTimeField(
+		auto_now=True
+	)
+	
 	class Meta:
 		ordering = ['-fecha_analisis']
 		indexes = [
-			models.Index(fields=['usuario', '-fecha_analisis']),
-			models.Index(fields=['nivel_riesgo']),
-			models.Index(fields=['requiere_intervencion']),
+			models.Index(fields=['savefile_id']),
+			models.Index(fields=['usuario_id']),
+			models.Index(fields=['fecha_analisis']),
 		]
-		verbose_name = "Análisis IA"
-		verbose_name_plural = "Análisis IA"
 
 	def __str__(self):
 		return f"Análisis {self.sesion.escenario_nombre} - {self.usuario.username}"

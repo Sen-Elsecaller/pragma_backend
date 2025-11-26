@@ -263,13 +263,12 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class AnalisisIASerializer(serializers.ModelSerializer):
-	"""Serializador para análisis generados por IA"""
 	class Meta:
 		model = AnalisisIA
 		fields = [
 			'id',
-			'sesion',
-			'usuario',
+			'savefile_id',
+			'usuario_id',
 			'puntuacion_total',
 			'nivel_general',
 			'emoji_nivel',
@@ -289,6 +288,7 @@ class AnalisisIASerializer(serializers.ModelSerializer):
 			'url_grafico_indicadores',
 			'datos_json',
 			'fecha_analisis',
-			'created_at'
+			'created_at',
+			'updated_at',
 		]
-		read_only_fields = ['id', 'usuario', 'created_at', 'fecha_analisis']
+		read_only_fields = ['id', 'created_at', 'updated_at', 'fecha_analisis']
