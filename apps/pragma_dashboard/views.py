@@ -306,7 +306,7 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 
 	def perform_create(self, serializer):
 		"""N8N guarda el análisis"""
-		serializer.save(usuario=self.request.user)
+		serializer.save()
 
 	@action(detail=False, methods=['get'])
 	def por_sesion(self, request):
