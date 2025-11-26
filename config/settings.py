@@ -442,24 +442,6 @@ ADMIN_SITE_HEADER = "PRAGMA Backend Administration"
 ADMIN_SITE_TITLE = "PRAGMA Admin"
 ADMIN_INDEX_TITLE = "Bienvenido al Panel de Administración"
 
-# ============================================
-# DEBUG TOOLBAR (solo en desarrollo)
-# ============================================
-
-if DEBUG:
-	try:
-		import debug_toolbar
-		
-		INSTALLED_APPS += ['debug_toolbar']
-		MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-		
-		INTERNAL_IPS = ['127.0.0.1', 'localhost']
-		
-		DEBUG_TOOLBAR_CONFIG = {
-			'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
-		}
-	except ImportError:
-		pass
 
 # ============================================
 # INFORMACIÓN DE CONFIGURACIÓN
