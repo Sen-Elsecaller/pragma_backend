@@ -191,7 +191,7 @@ class DashboardResumenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-	"""Serializador para registro de nuevos usuarios"""
+	"""Serializador para registro de nuevos usuarios - SIN requerir username"""
 	password = serializers.CharField(
 		write_only=True,
 		required=True,
@@ -207,17 +207,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
-		fields = ['username', 'email', 'password', 'password_confirm', 'first_name', 'last_name']
+		fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name']
 		extra_kwargs = {
-			'username': {'required': True, 'min_length': 3},
 			'email': {'required': True},
 		}
-
-	def validate_username(self, value):
-		"""Validar que el username sea único"""
-		if User.objects.filter(username=value).exists():
-			raise serializers.ValidationError('Este nombre de usuario ya está en uso')
-		return value
 
 	def validate_email(self, value):
 		"""Validar que el email sea único"""
@@ -236,6 +229,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		"""Crear usuario con contraseña hasheada"""
 		validated_data.pop('password_confirm')
+		
+		# Generar username desde el email (sin dominio)
+		email = validated_data['email']
+		username = email.split('@')[0]
+		
+		# Si el username ya existe, agregar un número
+		counter = 1
+		original_username = username
+		while User.objects.filter(username=username).exists():
+			username = f"{original_username}{counter}"
+			counter += 1
+		
+		validated_data['username'] = username
 		user = User.objects.create_user(**validated_data)
 		return user
 
