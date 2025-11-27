@@ -301,8 +301,8 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 	def get_queryset(self):
 		"""Solo análisis del usuario autenticado"""
 		return AnalisisIA.objects.filter(
-			usuario=self.request.user
-		).select_related('sesion', 'usuario').order_by('-fecha_analisis')
+			usuario_id=self.request.user.id
+		).order_by('-fecha_analisis')
 
 	def perform_create(self, serializer):
 		"""N8N guarda el análisis"""
@@ -354,23 +354,29 @@ class RegisterViewSet(viewsets.ViewSet):
 	"""ViewSet para registro de nuevos usuarios"""
 	permission_classes = [AllowAny]
 
-	@action(detail=False, methods=['post'])
-	def register(self, request):
-		"""Registrar un nuevo usuario"""
+	def create(self, request):
+		"""Registrar un nuevo usuario - POST /auth/register/"""
 		serializer = UserRegistrationSerializer(data=request.data)
 
 		if serializer.is_valid():
 			user = serializer.save()
 			return Response({
-				'message': 'Usuario registrado exitosamente',
-				'user': {
-					'id': user.id,
-					'username': user.username,
-					'email': user.email,
-				}
+				'id': user.id,
+				'username': user.username,
+				'email': user.email,
+				'first_name': user.first_name,
+				'last_name': user.last_name,
+				'message': 'Usuario registrado exitosamente'
 			}, status=status.HTTP_201_CREATED)
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+	def list(self, request):
+		"""GET /auth/register/ - No permitido"""
+		return Response(
+			{'error': 'Método GET no permitido en registro'},
+			status=status.HTTP_405_METHOD_NOT_ALLOWED
+		)
 
 
 class UserProfileViewSet(viewsets.ViewSet):
