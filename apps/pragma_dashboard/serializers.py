@@ -191,7 +191,17 @@ class DashboardResumenSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-	"""Serializador para registro de nuevos usuarios - SIN requerir username"""
+	"""
+	Serializador para registro de nuevos usuarios
+	Campos: nombre (Nombre completo), email, password, password_confirm
+	El nombre se divide en first_name y last_name automáticamente
+	"""
+	nombre = serializers.CharField(
+		write_only=True,
+		required=True,
+		min_length=3,
+		help_text="Nombre completo del usuario"
+	)
 	password = serializers.CharField(
 		write_only=True,
 		required=True,
@@ -207,7 +217,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
-		fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name']
+		fields = ['nombre', 'email', 'password', 'password_confirm']
 		extra_kwargs = {
 			'email': {'required': True},
 		}
@@ -230,6 +240,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 		"""Crear usuario con contraseña hasheada"""
 		validated_data.pop('password_confirm')
 		
+		# Dividir nombre en first_name y last_name
+		nombre = validated_data.pop('nombre')
+		partes_nombre = nombre.strip().split(maxsplit=1)
+		
+		first_name = partes_nombre[0] if len(partes_nombre) > 0 else ''
+		last_name = partes_nombre[1] if len(partes_nombre) > 1 else ''
+		
 		# Generar username desde el email (sin dominio)
 		email = validated_data['email']
 		username = email.split('@')[0]
@@ -241,7 +258,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 			username = f"{original_username}{counter}"
 			counter += 1
 		
+		# Preparar datos para crear usuario
 		validated_data['username'] = username
+		validated_data['first_name'] = first_name
+		validated_data['last_name'] = last_name
+		
 		user = User.objects.create_user(**validated_data)
 		return user
 
