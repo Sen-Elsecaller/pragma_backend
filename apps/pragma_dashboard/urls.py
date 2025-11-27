@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
+	CustomTokenObtainPairView,
 	SesionSimulacionViewSet,
 	DecisionTomadaViewSet,
 	EventoOcurridoViewSet,
@@ -26,5 +27,9 @@ router.register(r'auth/register', RegisterViewSet, basename='register')
 router.register(r'auth/profile', UserProfileViewSet, basename='profile')
 
 urlpatterns = [
+	# Login customizado con email (sin token en root)
+	path('auth/login/', CustomTokenObtainPairView.as_view(), name='auth_login'),
+	
+	# Rutas de router
 	path('', include(router.urls)),
 ]

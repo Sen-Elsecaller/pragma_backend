@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -32,6 +34,78 @@ from .serializers import (
 	AnalisisIASerializer
 )
 
+
+# ============================================
+# AUTENTICACIÓN CUSTOMIZADA - LOGIN CON EMAIL
+# ============================================
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+	"""
+	Serializer customizado que acepta email O username
+	Busca el usuario por email y luego valida la contraseña
+	"""
+	username_field = 'email'  # Campo que espera en el JSON
+	
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		# Cambiar el campo 'username' por 'email' en los campos del serializer
+		self.fields['email'] = self.fields.pop('username')
+	
+	def validate(self, attrs):
+		"""
+		Validar credenciales usando email en lugar de username
+		"""
+		email = attrs.get('email')
+		password = attrs.get('password')
+		
+		try:
+			# Buscar usuario por email
+			user = User.objects.get(email=email)
+		except User.DoesNotExist:
+			raise ValueError('No usuario encontrado con este email')
+		
+		# Validar contraseña
+		if not user.check_password(password):
+			raise ValueError('Contraseña incorrecta')
+		
+		# Validar que el usuario esté activo
+		if not user.is_active:
+			raise ValueError('Este usuario ha sido desactivado')
+		
+		# Llamar al método refresh para obtener los tokens
+		refresh = self.get_token(user)
+		
+		data = {
+			'refresh': str(refresh),
+			'access': str(refresh.access_token),
+			'user': {
+				'id': user.id,
+				'username': user.username,
+				'email': user.email,
+				'first_name': user.first_name,
+				'last_name': user.last_name,
+			}
+		}
+		
+		return data
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+	"""
+	Vista customizada para obtener tokens usando email
+	POST /api/v1/dashboard/auth/login/
+	{
+		"email": "usuario@pragma.test",
+		"password": "Pragma@2024"
+	}
+	"""
+	serializer_class = CustomTokenObtainPairSerializer
+	permission_classes = [AllowAny]
+
+
+# ============================================
+# SESIONES
+# ============================================
 
 class SesionSimulacionViewSet(viewsets.ModelViewSet):
 	"""
