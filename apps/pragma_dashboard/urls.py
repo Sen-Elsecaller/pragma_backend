@@ -27,6 +27,5 @@ router.register(r'auth/register', RegisterViewSet, basename='register')
 router.register(r'auth/profile', UserProfileViewSet, basename='profile')
 
 urlpatterns = [
-	path('auth/login/', CustomTokenObtainPairView.as_view(), name='auth_login'),  # ← ESTA LÍNEA
 	path('', include(router.urls)),
 ]
