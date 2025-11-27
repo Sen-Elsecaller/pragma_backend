@@ -59,18 +59,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 		password = attrs.get('password')
 		
 		try:
-			# Buscar usuario por email
 			user = User.objects.get(email=email)
 		except User.DoesNotExist:
-			raise ValueError('No usuario encontrado con este email')
-		
-		# Validar contraseña
+			raise serializers.ValidationError({'email': 'No existe un usuario con este email'})
+
 		if not user.check_password(password):
-			raise ValueError('Contraseña incorrecta')
-		
-		# Validar que el usuario esté activo
+			raise serializers.ValidationError({'password': 'Contraseña incorrecta'})
+
 		if not user.is_active:
-			raise ValueError('Este usuario ha sido desactivado')
+			raise serializers.ValidationError({'error': 'Usuario desactivado'})
 		
 		# Llamar al método refresh para obtener los tokens
 		refresh = self.get_token(user)
