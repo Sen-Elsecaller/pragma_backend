@@ -374,14 +374,36 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 	serializer_class = AnalisisIASerializer
 
 	def get_queryset(self):
-		"""Solo análisis del usuario autenticado"""
-		return AnalisisIA.objects.filter(
-			usuario_id=self.request.user.id
-		).order_by('-fecha_analisis')
+		"""TEMPORAL: Ver todos los análisis sin filtro"""
+		return AnalisisIA.objects.all().order_by('-fecha_analisis')
+
 
 	def perform_create(self, serializer):
 		"""N8N guarda el análisis"""
 		serializer.save()
+
+	@action(detail=False, methods=['get'])
+	def todos(self, request):
+		"""
+		NUEVO ENDPOINT: Ver TODOS los análisis (solo para admins)
+		GET /api/v1/dashboard/analisis-ia/todos/
+		"""
+		if not (request.user.is_staff or request.user.is_superuser):
+			return Response(
+				{'error': 'No tienes permisos para ver todos los análisis'},
+				status=status.HTTP_403_FORBIDDEN
+			)
+		
+		analisis = AnalisisIA.objects.all().order_by('-fecha_analisis')
+		
+		# Paginación
+		page = self.paginate_queryset(analisis)
+		if page is not None:
+			serializer = self.get_serializer(page, many=True)
+			return self.get_paginated_response(serializer.data)
+		
+		serializer = self.get_serializer(analisis, many=True)
+		return Response(serializer.data)
 
 	@action(detail=False, methods=['get'])
 	def por_sesion(self, request):
@@ -394,7 +416,12 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 				status=status.HTTP_400_BAD_REQUEST
 			)
 
-		analisis = self.get_queryset().filter(sesion_id=sesion_id).first()
+		# Si es admin, puede ver cualquier análisis
+		if request.user.is_staff or request.user.is_superuser:
+			analisis = AnalisisIA.objects.filter(savefile_id=sesion_id).first()
+		else:
+			analisis = self.get_queryset().filter(savefile_id=sesion_id).first()
+			
 		if not analisis:
 			return Response(
 				{'error': 'Análisis no encontrado'},
@@ -406,7 +433,7 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 
 	@action(detail=False, methods=['get'])
 	def ultimos(self, request):
-		"""Obtiene los últimos 10 análisis del usuario"""
+		"""Obtiene los últimos 10 análisis"""
 		analisis = self.get_queryset()[:10]
 		serializer = self.get_serializer(analisis, many=True)
 		return Response(serializer.data)
@@ -418,7 +445,6 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 		analisis = self.get_queryset().filter(nivel_riesgo=nivel_riesgo)
 		serializer = self.get_serializer(analisis, many=True)
 		return Response(serializer.data)
-
 
 # ============================================
 # AUTENTICACIÓN Y USUARIO
