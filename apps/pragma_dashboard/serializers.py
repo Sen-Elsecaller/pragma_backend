@@ -179,7 +179,7 @@ class SaveFileUsuarioSerializer(serializers.ModelSerializer):
 # ============================================
 
 class AnalisisIAListSerializer(serializers.ModelSerializer):
-	"""Serializador simplificado para listas de análisis"""
+	"""Serializador simplificado para listas de análisis - INCLUYE CAMPOS DE COMPETENCIAS"""
 	usuario = UserSerializer(read_only=True)
 
 	class Meta:
@@ -192,10 +192,16 @@ class AnalisisIAListSerializer(serializers.ModelSerializer):
 			'usuario_email',
 			'resumen_ejecutivo',
 			'conclusiones_clinicas',
+			'alertas_psicologicas',
 			'nivel_riesgo',
 			'requiere_intervencion',
 			'timestamp_analisis',
-			'created_at'
+			'created_at',
+			# ✅ AGREGADOS - Campos de competencias y análisis
+			'perfil_psicoeducativo',
+			'mecanismos_afrontamiento',
+			'metadata_groq',
+			'analisis_detallado'
 		]
 		read_only_fields = ['id', 'created_at', 'timestamp_analisis']
 
