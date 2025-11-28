@@ -255,13 +255,14 @@ class AnalisisIADetailSerializer(serializers.ModelSerializer):
 
 class AnalisisIACreateSerializer(serializers.ModelSerializer):
 	"""Serializador para crear análisis (recibido de N8N)"""
+	usuario_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
 	
 	class Meta:
 		model = AnalisisIA
 		fields = [
 			'sesion',
 			'savefile_id',
-			'usuario',
+			'usuario_id',  # ← Aceptar como integer, no como relación
 			'usuario_nombre',
 			'usuario_email',
 			
@@ -286,7 +287,17 @@ class AnalisisIACreateSerializer(serializers.ModelSerializer):
 		]
 
 	def create(self, validated_data):
-		"""Crear análisis desde N8N"""
+		"""Crear análisis desde N8N - Buscar usuario por ID"""
+		usuario_id = validated_data.pop('usuario_id', None)
+		
+		if usuario_id:
+			try:
+				usuario = User.objects.get(id=usuario_id)
+				validated_data['usuario'] = usuario
+				print(f'✅ Usuario encontrado: {usuario.username} (ID: {usuario_id})')
+			except User.DoesNotExist:
+				print(f'⚠️ Usuario ID {usuario_id} no encontrado')
+		
 		return super().create(validated_data)
 
 
