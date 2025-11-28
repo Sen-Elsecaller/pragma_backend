@@ -466,3 +466,95 @@ class AnalisisIAViewSet(viewsets.ModelViewSet):
 			'por_riesgo': por_riesgo,
 			'requieren_intervencion': requieren_intervencion,
 		})
+	
+# ============================================
+# AUTENTICACIÓN Y USUARIO
+# ============================================
+
+class RegisterViewSet(viewsets.ViewSet):
+	"""ViewSet para registro de nuevos usuarios"""
+	permission_classes = [AllowAny]
+
+	def create(self, request):
+		"""Registrar un nuevo usuario - POST /auth/register/"""
+		serializer = UserRegistrationSerializer(data=request.data)
+
+		if serializer.is_valid():
+			user = serializer.save()
+			return Response({
+				'id': user.id,
+				'username': user.username,
+				'email': user.email,
+				'first_name': user.first_name,
+				'last_name': user.last_name,
+				'message': 'Usuario registrado exitosamente'
+			}, status=status.HTTP_201_CREATED)
+
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+	def list(self, request):
+		"""GET /auth/register/ - No permitido"""
+		return Response(
+			{'error': 'Método GET no permitido en registro'},
+			status=status.HTTP_405_METHOD_NOT_ALLOWED
+		)
+
+
+class UserProfileViewSet(viewsets.ViewSet):
+	"""ViewSet para gestión de perfil de usuario autenticado"""
+	authentication_classes = [JWTAuthentication]
+	permission_classes = [IsAuthenticated]
+
+	@action(detail=False, methods=['get'])
+	def me(self, request):
+		"""Obtener datos del usuario autenticado"""
+		serializer = UserDetailSerializer(request.user)
+		return Response(serializer.data)
+
+	@action(detail=False, methods=['patch'])
+	def update_profile(self, request):
+		"""Actualizar perfil del usuario"""
+		user = request.user
+
+		if 'first_name' in request.data:
+			user.first_name = request.data['first_name']
+
+		if 'last_name' in request.data:
+			user.last_name = request.data['last_name']
+
+		if 'email' in request.data:
+			email = request.data['email'].strip()
+			if User.objects.filter(email=email).exclude(id=user.id).exists():
+				return Response(
+					{'error': 'Este email ya está registrado'},
+					status=status.HTTP_400_BAD_REQUEST
+				)
+			user.email = email
+
+		user.save()
+		serializer = UserDetailSerializer(user)
+		return Response(serializer.data)
+
+	@action(detail=False, methods=['post'])
+	def change_password(self, request):
+		"""Cambiar contraseña del usuario"""
+		user = request.user
+		serializer = ChangePasswordSerializer(data=request.data)
+
+		if serializer.is_valid():
+			# Validar contraseña actual
+			if not user.check_password(serializer.validated_data['old_password']):
+				return Response(
+					{'error': 'La contraseña actual es incorrecta'},
+					status=status.HTTP_400_BAD_REQUEST
+				)
+
+			# Establecer nueva contraseña
+			user.set_password(serializer.validated_data['new_password'])
+			user.save()
+
+			return Response({
+				'message': 'Contraseña cambiada exitosamente'
+			}, status=status.HTTP_200_OK)
+
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

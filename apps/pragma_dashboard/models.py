@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 
 class SesionSimulacion(models.Model):
@@ -289,6 +290,7 @@ class AnalisisIA(models.Model):
 		help_text="Relación con sesión de simulación (opcional)"
 	)
 	savefile_id = models.IntegerField(
+		default=0,
 		help_text="ID del savefile (referencia externa)",
 		db_index=True
 	)
@@ -391,6 +393,7 @@ class AnalisisIA(models.Model):
 	
 	# Timestamps
 	timestamp_analisis = models.DateTimeField(
+		default=timezone.now,
 		help_text="Cuando Groq generó el análisis"
 	)
 	timestamp_recibido = models.DateTimeField(
