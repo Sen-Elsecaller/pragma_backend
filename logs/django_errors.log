@@ -40,3 +40,181 @@
 [ERROR] 2025-11-23 20:48:32,751 django.server basehttp 18216 9764 - You're accessing the development server over HTTPS, but it only supports HTTP.
 [ERROR] 2025-11-23 20:48:32,798 django.server basehttp 18216 11000 - You're accessing the development server over HTTPS, but it only supports HTTP.
 [ERROR] 2025-11-23 20:48:33,065 django.server basehttp 18216 74736 - You're accessing the development server over HTTPS, but it only supports HTTP.
+[ERROR] 2025-11-27 20:54:20,248 django.request log 30544 65628 - Internal Server Error: /api/v1/dashboard/auth/login/
+Traceback (most recent call last):
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework_simplejwt\views.py", line 43, in post
+    serializer = self.get_serializer(data=request.data)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\generics.py", line 114, in get_serializer
+    return serializer_class(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\pragma\backend\config\urls.py", line 25, in __init__
+    self.fields['email'] = self.fields.pop('username')
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen _collections_abc>", line 945, in pop
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\utils\serializer_helpers.py", line 168, in __getitem__
+    return self.fields[key]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'username'
+[ERROR] 2025-11-27 20:54:20,252 django.server basehttp 30544 65628 - "POST /api/v1/dashboard/auth/login/ HTTP/1.1" 500 122430
+[ERROR] 2025-11-27 20:57:30,030 django.request log 15668 69040 - Internal Server Error: /api/v1/dashboard/auth/login/
+Traceback (most recent call last):
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework_simplejwt\views.py", line 43, in post
+    serializer = self.get_serializer(data=request.data)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\generics.py", line 114, in get_serializer
+    return serializer_class(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\pragma\backend\apps\pragma_dashboard\views.py", line 52, in __init__
+    self.fields['email'] = self.fields.pop('username')
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen _collections_abc>", line 945, in pop
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\utils\serializer_helpers.py", line 168, in __getitem__
+    return self.fields[key]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'username'
+[ERROR] 2025-11-27 20:57:30,033 django.server basehttp 15668 69040 - "POST /api/v1/dashboard/auth/login/ HTTP/1.1" 500 122752
+[ERROR] 2025-11-27 20:58:19,788 django.request log 29896 75576 - Internal Server Error: /api/v1/dashboard/auth/login/
+Traceback (most recent call last):
+  File "C:\PROYECTOS\pragma\backend\apps\pragma_dashboard\views.py", line 64, in validate
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+django.contrib.auth.models.User.DoesNotExist: User matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework_simplejwt\views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\pragma\backend\apps\pragma_dashboard\views.py", line 66, in validate
+    raise serializers.ValidationError({'email': 'No existe un usuario con este email'})
+          ^^^^^^^^^^^
+NameError: name 'serializers' is not defined
+[ERROR] 2025-11-27 20:58:19,795 django.server basehttp 29896 75576 - "POST /api/v1/dashboard/auth/login/ HTTP/1.1" 500 135603
+[ERROR] 2025-11-27 20:58:29,579 django.request log 18676 57276 - Internal Server Error: /api/v1/dashboard/auth/login/
+Traceback (most recent call last):
+  File "C:\PROYECTOS\pragma\backend\apps\pragma_dashboard\views.py", line 64, in validate
+    user = User.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+django.contrib.auth.models.User.DoesNotExist: User matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\django\views\generic\base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework_simplejwt\views.py", line 46, in post
+    serializer.is_valid(raise_exception=True)
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\venv\Lib\site-packages\rest_framework\serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\PROYECTOS\pragma\backend\apps\pragma_dashboard\views.py", line 66, in validate
+    raise serializers.ValidationError({'email': 'No existe un usuario con este email'})
+          ^^^^^^^^^^^
+NameError: name 'serializers' is not defined
+[ERROR] 2025-11-27 20:58:29,586 django.server basehttp 18676 57276 - "POST /api/v1/dashboard/auth/login/ HTTP/1.1" 500 135603

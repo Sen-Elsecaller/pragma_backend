@@ -8,6 +8,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from django.contrib.auth.models import User
+from rest_framework import serializers
+
 
 from .models import (
 	SesionSimulacion,
@@ -48,8 +50,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 	
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		# Cambiar el campo 'username' por 'email' en los campos del serializer
-		self.fields['email'] = self.fields.pop('username')
+
+		# Aseguramos que username exista antes de hacer pop
+		if 'username' in self.fields:
+			self.fields['email'] = self.fields.pop('username')
 	
 	def validate(self, attrs):
 		"""
