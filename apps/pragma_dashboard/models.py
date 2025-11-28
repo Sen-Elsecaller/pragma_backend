@@ -267,146 +267,149 @@ class SaveFileUsuario(models.Model):
 
 
 class AnalisisIA(models.Model):
+	"""
+	Modelo para almacenar análisis psicopedagógicos generados por Groq.
+	Almacena toda la retroalimentación en formato JSONB.
+	"""
 	NIVEL_RIESGO_CHOICES = [
 		('bajo', 'Bajo'),
-		('medio', 'Medio'),
+		('leve', 'Leve'),
+		('moderado', 'Moderado'),
 		('alto', 'Alto'),
+		('severo', 'Severo'),
 	]
 	
-	# Referencias a tablas externas (savefiles_usuario y usuarios)
+	# Referencias
+	sesion = models.OneToOneField(
+		SesionSimulacion,
+		on_delete=models.CASCADE,
+		related_name='analisis_ia',
+		null=True,
+		blank=True,
+		help_text="Relación con sesión de simulación (opcional)"
+	)
 	savefile_id = models.IntegerField(
-		help_text="ID del savefiles_usuario",
+		help_text="ID del savefile (referencia externa)",
 		db_index=True
 	)
-	usuario_id = models.IntegerField(
-		help_text="ID del usuario (referencia externa)"
-	)
-	
-	# Puntuación general
-	puntuacion_total = models.IntegerField(
-		default=0,
-		help_text="Puntuación total (0-100)"
-	)
-	nivel_general = models.CharField(
-		max_length=50,
-		default='Regular',
-		choices=[
-			('Excelente', 'Excelente'),
-			('Bueno', 'Bueno'),
-			('Regular', 'Regular'),
-			('Necesita mejorar', 'Necesita mejorar'),
-			('Crítico', 'Crítico'),
-		]
-	)
-	emoji_nivel = models.CharField(
-		max_length=10,
-		default='⚠️'
-	)
-	
-	# Scores de competencias (0-10)
-	score_velocidad = models.DecimalField(
-		max_digits=3,
-		decimal_places=1,
-		default=0,
-		help_text="Score de velocidad de respuesta (0-10)"
-	)
-	score_precision = models.DecimalField(
-		max_digits=3,
-		decimal_places=1,
-		default=0,
-		help_text="Score de precisión (0-10)"
-	)
-	score_consistencia = models.DecimalField(
-		max_digits=3,
-		decimal_places=1,
-		default=0,
-		help_text="Score de consistencia (0-10)"
-	)
-	score_manejo_estres = models.DecimalField(
-		max_digits=3,
-		decimal_places=1,
-		default=0,
-		help_text="Score de manejo de estrés (0-10)"
-	)
-	score_engagement = models.DecimalField(
-		max_digits=3,
-		decimal_places=1,
-		default=0,
-		help_text="Score de engagement (0-10)"
-	)
-	
-	# Análisis textual de Groq (como JSON strings)
-	resumen_fortalezas = models.TextField(
+	usuario = models.ForeignKey(
+		User,
+		on_delete=models.CASCADE,
+		related_name='analisis_ia',
+		null=True,
 		blank=True,
-		default='[]',
-		help_text="JSON array de fortalezas identificadas"
+		help_text="Usuario propietario del análisis"
 	)
-	resumen_areas_mejora = models.TextField(
+	usuario_nombre = models.CharField(
+		max_length=255,
 		blank=True,
-		default='[]',
-		help_text="JSON array de áreas de mejora"
+		help_text="Nombre del usuario al momento del análisis"
 	)
-	resumen_recomendaciones = models.TextField(
+	usuario_email = models.EmailField(
 		blank=True,
-		default='[]',
-		help_text="JSON array de recomendaciones"
+		help_text="Email del usuario al momento del análisis"
 	)
 	
-	# Indicadores de riesgo
-	nivel_riesgo = models.CharField(
-		max_length=20,
-		choices=NIVEL_RIESGO_CHOICES,
-		default='bajo'
+	# Retroalimentación textual principal de Groq
+	resumen_ejecutivo = models.TextField(
+		blank=True,
+		help_text="Resumen ejecutivo del análisis"
+	)
+	conclusiones_clinicas = models.TextField(
+		blank=True,
+		help_text="Conclusiones clínicas del análisis"
 	)
 	alertas_psicologicas = models.TextField(
 		blank=True,
-		default='Sin alertas'
+		help_text="Alertas psicológicas identificadas"
+	)
+	
+	# Análisis estructurado (como JSON)
+	perfil_psicoeducativo = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Perfil psicoeducativo del usuario"
+	)
+	analisis_detallado = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Análisis detallado (patrones, fortalezas, vulnerabilidades)"
+	)
+	mecanismos_afrontamiento = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Mecanismos de afrontamiento identificados"
+	)
+	indicadores_psicologicos = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Indicadores psicológicos y riesgo"
+	)
+	recomendaciones_especificas = models.JSONField(
+		default=list,
+		blank=True,
+		help_text="Recomendaciones específicas de Groq"
+	)
+	plan_intervencion = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Plan de intervención próximas sesiones"
+	)
+	
+	# Visualización
+	graficos = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="URLs de gráficos generados"
+	)
+	
+	# Metadata de Groq
+	metadata_groq = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Metadata del análisis (modelo, tokens, timestamps)"
+	)
+	
+	# Datos completos (backup)
+	datos_completos_groq = models.JSONField(
+		default=dict,
+		blank=True,
+		help_text="Respuesta completa de Groq (backup)"
+	)
+	
+	# Nivel de riesgo (resumen)
+	nivel_riesgo = models.CharField(
+		max_length=20,
+		choices=NIVEL_RIESGO_CHOICES,
+		default='bajo',
+		help_text="Nivel de riesgo psicológico general"
 	)
 	requiere_intervencion = models.BooleanField(
 		default=False,
-		help_text="Indica si se requiere intervención de psicólogo"
-	)
-	
-	# URLs de gráficos
-	url_grafico_distribucion = models.URLField(
-		blank=True,
-		null=True
-	)
-	url_grafico_radar = models.URLField(
-		blank=True,
-		null=True
-	)
-	url_grafico_indicadores = models.URLField(
-		blank=True,
-		null=True
-	)
-	
-	# Datos JSON completo de Groq
-	datos_json = models.JSONField(
-		default=dict,
-		blank=True,
-		help_text="Respuesta completa de Groq"
+		help_text="Si requiere intervención profesional inmediata"
 	)
 	
 	# Timestamps
-	fecha_analisis = models.DateTimeField(
+	timestamp_analisis = models.DateTimeField(
+		help_text="Cuando Groq generó el análisis"
+	)
+	timestamp_recibido = models.DateTimeField(
 		auto_now_add=True,
-		help_text="Fecha/hora cuando se generó el análisis"
+		help_text="Cuando llegó al backend"
 	)
-	created_at = models.DateTimeField(
-		auto_now_add=True
-	)
-	updated_at = models.DateTimeField(
-		auto_now=True
-	)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
 	
 	class Meta:
-		ordering = ['-fecha_analisis']
+		ordering = ['-timestamp_analisis']
 		indexes = [
 			models.Index(fields=['savefile_id']),
-			models.Index(fields=['usuario_id']),
-			models.Index(fields=['fecha_analisis']),
+			models.Index(fields=['usuario']),
+			models.Index(fields=['timestamp_analisis']),
+			models.Index(fields=['nivel_riesgo']),
 		]
+		verbose_name = "Análisis IA"
+		verbose_name_plural = "Análisis IA"
 
 	def __str__(self):
-		return f"Análisis {self.sesion.escenario_nombre} - {self.usuario.username}"
+		return f"Análisis {self.usuario_nombre} - {self.timestamp_analisis}"

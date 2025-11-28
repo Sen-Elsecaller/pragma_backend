@@ -174,6 +174,116 @@ class SaveFileUsuarioSerializer(serializers.ModelSerializer):
 		return super().create(validated_data)
 
 
+# ============================================
+# ANÁLISIS IA - NUEVOS SERIALIZADORES
+# ============================================
+
+class AnalisisIAListSerializer(serializers.ModelSerializer):
+	"""Serializador simplificado para listas de análisis"""
+	usuario = UserSerializer(read_only=True)
+
+	class Meta:
+		model = AnalisisIA
+		fields = [
+			'id',
+			'savefile_id',
+			'usuario',
+			'usuario_nombre',
+			'usuario_email',
+			'resumen_ejecutivo',
+			'conclusiones_clinicas',
+			'nivel_riesgo',
+			'requiere_intervencion',
+			'timestamp_analisis',
+			'created_at'
+		]
+		read_only_fields = ['id', 'created_at', 'timestamp_analisis']
+
+
+class AnalisisIADetailSerializer(serializers.ModelSerializer):
+	"""Serializador detallado para análisis completos"""
+	usuario = UserSerializer(read_only=True)
+
+	class Meta:
+		model = AnalisisIA
+		fields = [
+			'id',
+			'sesion',
+			'savefile_id',
+			'usuario',
+			'usuario_nombre',
+			'usuario_email',
+			
+			# Retroalimentación principal
+			'resumen_ejecutivo',
+			'conclusiones_clinicas',
+			'alertas_psicologicas',
+			
+			# Análisis estructurado
+			'perfil_psicoeducativo',
+			'analisis_detallado',
+			'mecanismos_afrontamiento',
+			'indicadores_psicologicos',
+			'recomendaciones_especificas',
+			'plan_intervencion',
+			
+			# Visualización
+			'graficos',
+			
+			# Nivel de riesgo
+			'nivel_riesgo',
+			'requiere_intervencion',
+			
+			# Metadata
+			'metadata_groq',
+			'timestamp_analisis',
+			'timestamp_recibido',
+			'created_at',
+			'updated_at'
+		]
+		read_only_fields = [
+			'id', 'created_at', 'updated_at', 
+			'timestamp_analisis', 'timestamp_recibido'
+		]
+
+
+class AnalisisIACreateSerializer(serializers.ModelSerializer):
+	"""Serializador para crear análisis (recibido de N8N)"""
+	
+	class Meta:
+		model = AnalisisIA
+		fields = [
+			'sesion',
+			'savefile_id',
+			'usuario',
+			'usuario_nombre',
+			'usuario_email',
+			
+			'resumen_ejecutivo',
+			'conclusiones_clinicas',
+			'alertas_psicologicas',
+			
+			'perfil_psicoeducativo',
+			'analisis_detallado',
+			'mecanismos_afrontamiento',
+			'indicadores_psicologicos',
+			'recomendaciones_especificas',
+			'plan_intervencion',
+			
+			'graficos',
+			'metadata_groq',
+			'datos_completos_groq',
+			
+			'nivel_riesgo',
+			'requiere_intervencion',
+			'timestamp_analisis',
+		]
+
+	def create(self, validated_data):
+		"""Crear análisis desde N8N"""
+		return super().create(validated_data)
+
+
 class DashboardResumenSerializer(serializers.Serializer):
 	"""Serializador para el resumen del dashboard personal"""
 	total_sesiones = serializers.IntegerField()
@@ -287,35 +397,3 @@ class ChangePasswordSerializer(serializers.Serializer):
 				'new_password_confirm': 'Las contraseñas no coinciden'
 			})
 		return data
-
-
-class AnalisisIASerializer(serializers.ModelSerializer):
-	class Meta:
-		model = AnalisisIA
-		fields = [
-			'id',
-			'savefile_id',
-			'usuario_id',
-			'puntuacion_total',
-			'nivel_general',
-			'emoji_nivel',
-			'score_velocidad',
-			'score_precision',
-			'score_consistencia',
-			'score_manejo_estres',
-			'score_engagement',
-			'resumen_fortalezas',
-			'resumen_areas_mejora',
-			'resumen_recomendaciones',
-			'nivel_riesgo',
-			'alertas_psicologicas',
-			'requiere_intervencion',
-			'url_grafico_distribucion',
-			'url_grafico_radar',
-			'url_grafico_indicadores',
-			'datos_json',
-			'fecha_analisis',
-			'created_at',
-			'updated_at',
-		]
-		read_only_fields = ['id', 'created_at', 'updated_at', 'fecha_analisis']
