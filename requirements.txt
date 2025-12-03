@@ -2,7 +2,7 @@
 Django==4.2.10
 
 # Base de datos (PostgreSQL + URL parser)
-psycopg2-binary==2.9.9
+psycopg==3.1.18
 dj-database-url==2.2.0
 
 # Django REST Framework
@@ -21,12 +21,12 @@ drf-yasg==1.21.7
 # Archivos estáticos en producción
 whitenoise==6.6.0
 
-# Debug Toolbar (solo en DEV, pero está bien incluirlo)
+# Debug Toolbar
 django-debug-toolbar==4.3.0
 
 # Utils
 python-dotenv==1.0.1
 PyYAML==6.0.1
 
-# Para producción en algunos hostings (opcional, pero muy recomendado)
+# Producción
 gunicorn==21.2.0

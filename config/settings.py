@@ -1,5 +1,5 @@
 """
-Django settings for PRAGMA Backend project - VERSIÓN ACTUALIZADA PARA DASHBOARD.
+Django settings for PRAGMA Backend project
 
 Configuración completa y lista para producción con autenticación JWT sólida.
 """
