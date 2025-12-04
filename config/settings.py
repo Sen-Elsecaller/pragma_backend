@@ -443,6 +443,17 @@ ADMIN_SITE_HEADER = "PRAGMA Backend Administration"
 ADMIN_SITE_TITLE = "PRAGMA Admin"
 ADMIN_INDEX_TITLE = "Bienvenido al Panel de Administración"
 
+# ============ CIFRADO AES-256 ============
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', 'a' * 32).encode() if isinstance(os.getenv('ENCRYPTION_KEY', 'a' * 32), str) else os.getenv('ENCRYPTION_KEY', b'a' * 32)
+
+# Si es string, convertir a bytes (32 bytes = 256 bits)
+if isinstance(ENCRYPTION_KEY, str):
+	ENCRYPTION_KEY = ENCRYPTION_KEY.encode().ljust(32)[:32]
+elif len(ENCRYPTION_KEY) != 32:
+	ENCRYPTION_KEY = (b'a' * 32)  # Default si hay problema
+
+print(f"🔐 Clave de cifrado configurada: {len(ENCRYPTION_KEY)} bytes")
+
 
 # ============================================
 # INFORMACIÓN DE CONFIGURACIÓN

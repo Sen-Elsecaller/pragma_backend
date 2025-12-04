@@ -1,5 +1,7 @@
+import json
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.conf import settings
 from .models import (
 	SesionSimulacion,
 	ProgresoHistorico,
@@ -9,6 +11,9 @@ from .models import (
 	SaveFileUsuario,
 	AnalisisIA
 )
+
+# ✅ IMPORTAR ENCRYPTION
+from .utils.encryption import encrypt_aes256, decrypt_aes256
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -154,7 +159,7 @@ class ProgresoHistoricoSerializer(serializers.ModelSerializer):
 
 
 class SaveFileUsuarioSerializer(serializers.ModelSerializer):
-	"""Serializador para archivos guardados de usuario"""
+	"""Serializador para archivos guardados de usuario - CON CIFRADO"""
 	usuario = UserSerializer(read_only=True)
 
 	class Meta:
@@ -170,8 +175,43 @@ class SaveFileUsuarioSerializer(serializers.ModelSerializer):
 		read_only_fields = ['id', 'created_at', 'ultima_actualizacion']
 
 	def create(self, validated_data):
+		"""Cifrar datos antes de guardar"""
+		# Obtener clave de cifrado
+		encryption_key = getattr(settings, 'ENCRYPTION_KEY', b'a' * 32)
+		
+		# Convertir datos a JSON si es dict
+		datos = validated_data.get('datos_savefile')
+		if isinstance(datos, dict):
+			datos = json.dumps(datos)
+		
+		# ✅ CIFRAR los datos y convertir a HEX
+		datos_cifrados_bytes = encrypt_aes256(datos, encryption_key)
+		validated_data['datos_savefile'] = datos_cifrados_bytes.hex()
+		
 		validated_data['usuario'] = self.context['request'].user
 		return super().create(validated_data)
+
+	def to_representation(self, instance):
+		"""Descifrar datos antes de devolver"""
+		data = super().to_representation(instance)
+		
+		encryption_key = getattr(settings, 'ENCRYPTION_KEY', b'a' * 32)
+		
+		try:
+			# Convertir de HEX a BYTES
+			datos_cifrados_bytes = bytes.fromhex(instance.datos_savefile)
+			# ✅ DESCIFRAR
+			datos_descifrados = decrypt_aes256(datos_cifrados_bytes, encryption_key)
+			# Intentar parsear como JSON
+			try:
+				data['datos_savefile'] = json.loads(datos_descifrados)
+			except json.JSONDecodeError:
+				data['datos_savefile'] = datos_descifrados
+		except Exception as e:
+			print(f"⚠️ Error descifrando SaveFile: {e}")
+			data['datos_savefile'] = None
+		
+		return data
 
 
 # ============================================
@@ -179,7 +219,7 @@ class SaveFileUsuarioSerializer(serializers.ModelSerializer):
 # ============================================
 
 class AnalisisIAListSerializer(serializers.ModelSerializer):
-	"""Serializador simplificado para listas de análisis - INCLUYE CAMPOS DE COMPETENCIAS"""
+	"""Serializador simplificado para listas de análisis - CON CIFRADO"""
 	usuario = UserSerializer(read_only=True)
 
 	class Meta:
@@ -197,7 +237,6 @@ class AnalisisIAListSerializer(serializers.ModelSerializer):
 			'requiere_intervencion',
 			'timestamp_analisis',
 			'created_at',
-			# ✅ AGREGADOS - Campos de competencias y análisis
 			'perfil_psicoeducativo',
 			'mecanismos_afrontamiento',
 			'metadata_groq',
@@ -205,9 +244,34 @@ class AnalisisIAListSerializer(serializers.ModelSerializer):
 		]
 		read_only_fields = ['id', 'created_at', 'timestamp_analisis']
 
+	def to_representation(self, instance):
+		"""Descifrar datos sensibles antes de devolver"""
+		data = super().to_representation(instance)
+		
+		encryption_key = getattr(settings, 'ENCRYPTION_KEY', b'a' * 32)
+		
+		# Campos que pueden estar cifrados
+		campos_cifrados = ['resumen_ejecutivo', 'conclusiones_clinicas', 'alertas_psicologicas']
+		
+		for campo in campos_cifrados:
+			if instance.datos_completos_groq.get(campo):
+				try:
+					# Datos cifrados están en formato HEX STRING
+					cifrado_hex = instance.datos_completos_groq[campo]
+					if isinstance(cifrado_hex, str):
+						# ✅ Convertir de HEX a BYTES
+						cifrado_bytes = bytes.fromhex(cifrado_hex)
+						# ✅ DESCIFRAR
+						descifrado = decrypt_aes256(cifrado_bytes, encryption_key)
+						data[campo] = descifrado
+				except Exception as e:
+					print(f"⚠️ Error descifrando {campo}: {e}")
+		
+		return data
+
 
 class AnalisisIADetailSerializer(serializers.ModelSerializer):
-	"""Serializador detallado para análisis completos"""
+	"""Serializador detallado para análisis completos - CON CIFRADO"""
 	usuario = UserSerializer(read_only=True)
 
 	class Meta:
@@ -252,9 +316,37 @@ class AnalisisIADetailSerializer(serializers.ModelSerializer):
 			'timestamp_analisis', 'timestamp_recibido'
 		]
 
+	def to_representation(self, instance):
+		"""Descifrar todos los datos sensibles"""
+		data = super().to_representation(instance)
+		
+		encryption_key = getattr(settings, 'ENCRYPTION_KEY', b'a' * 32)
+		
+		campos_cifrados = [
+			'resumen_ejecutivo', 
+			'conclusiones_clinicas', 
+			'alertas_psicologicas'
+		]
+		
+		for campo in campos_cifrados:
+			if instance.datos_completos_groq.get(campo):
+				try:
+					# Datos cifrados están en formato HEX STRING
+					cifrado_hex = instance.datos_completos_groq[campo]
+					if isinstance(cifrado_hex, str):
+						# ✅ Convertir de HEX a BYTES
+						cifrado_bytes = bytes.fromhex(cifrado_hex)
+						# ✅ DESCIFRAR
+						descifrado = decrypt_aes256(cifrado_bytes, encryption_key)
+						data[campo] = descifrado
+				except Exception as e:
+					print(f"⚠️ Error descifrando {campo}: {e}")
+		
+		return data
+
 
 class AnalisisIACreateSerializer(serializers.ModelSerializer):
-	"""Serializador para crear análisis (recibido de N8N)"""
+	"""Serializador para crear análisis (recibido de N8N) - CON CIFRADO"""
 	usuario_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
 	
 	class Meta:
@@ -262,34 +354,51 @@ class AnalisisIACreateSerializer(serializers.ModelSerializer):
 		fields = [
 			'sesion',
 			'savefile_id',
-			'usuario_id',  # ← Aceptar como integer, no como relación
+			'usuario_id',
 			'usuario_nombre',
 			'usuario_email',
-			
 			'resumen_ejecutivo',
 			'conclusiones_clinicas',
 			'alertas_psicologicas',
-			
 			'perfil_psicoeducativo',
 			'analisis_detallado',
 			'mecanismos_afrontamiento',
 			'indicadores_psicologicos',
 			'recomendaciones_especificas',
 			'plan_intervencion',
-			
 			'graficos',
 			'metadata_groq',
 			'datos_completos_groq',
-			
 			'nivel_riesgo',
 			'requiere_intervencion',
 			'timestamp_analisis',
 		]
 
 	def create(self, validated_data):
-		"""Crear análisis desde N8N - Buscar usuario por ID"""
+		"""Crear análisis desde N8N - CIFRAR datos sensibles"""
 		usuario_id = validated_data.pop('usuario_id', None)
 		
+		# ✅ CIFRAR datos sensibles
+		encryption_key = getattr(settings, 'ENCRYPTION_KEY', b'a' * 32)
+		
+		# Campos a cifrar
+		campos_a_cifrar = ['resumen_ejecutivo', 'conclusiones_clinicas', 'alertas_psicologicas']
+		datos_cifrados = {}
+		
+		for campo in campos_a_cifrar:
+			if validated_data.get(campo):
+				try:
+					# ✅ CIFRAR y CONVERTIR A HEX
+					datos_cifrados_bytes = encrypt_aes256(validated_data[campo], encryption_key)
+					datos_cifrados[campo] = datos_cifrados_bytes.hex()
+					print(f"✅ {campo} cifrado correctamente")
+				except Exception as e:
+					print(f"⚠️ Error cifrando {campo}: {e}")
+		
+		# Guardar datos cifrados
+		validated_data['datos_completos_groq'] = datos_cifrados
+		
+		# Buscar usuario
 		if usuario_id:
 			try:
 				usuario = User.objects.get(id=usuario_id)
