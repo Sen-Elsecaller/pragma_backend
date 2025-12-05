@@ -30,17 +30,29 @@ ALLOWED_HOSTS = os.environ.get(
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    'http://localhost:3000,http://localhost:5173,https://pragmabackend-production.up.railway.app,https://html.itch.zone,https://itch.io'
+    'http://localhost:3000,http://localhost:5173,https://pragmabackend-production.up.railway.app,https://html.itch.zone,https://itch.io,https://v6p9d9t4.ssl.hwcdn.net'
 ).split(',')
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-	'CORS_ALLOWED_ORIGINS', 
-	'http://localhost:3000,http://localhost:5173,https://html.itch.zone,https://itch.io'
-).split(',')
+# ============================================
+# CORS CONFIGURATION - CORREGIDO PARA ITCH.IO
+# ============================================
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://html.itch.zone',
+    'https://itch.io',
+    'https://v6p9d9t4.ssl.hwcdn.net',  # CDN de itch.io
+]
+
+# Permitir credenciales (cookies, auth headers)
 CORS_ALLOW_CREDENTIALS = True
+
+# Para desarrollo, puedes usar True temporalmente
+# En producción, usa False y lista específica arriba
 CORS_ALLOW_ALL_ORIGINS = False
 
+# Headers permitidos en las peticiones
 CORS_ALLOW_HEADERS = [
 	'accept',
 	'accept-encoding',
@@ -51,6 +63,26 @@ CORS_ALLOW_HEADERS = [
 	'user-agent',
 	'x-csrftoken',
 	'x-requested-with',
+	'access-control-allow-origin',
+]
+
+# Métodos HTTP permitidos
+CORS_ALLOW_METHODS = [
+	'DELETE',
+	'GET',
+	'OPTIONS',
+	'PATCH',
+	'POST',
+	'PUT',
+]
+
+# Tiempo de caché para preflight requests (24 horas)
+CORS_PREFLIGHT_MAX_AGE = 86400
+
+# Headers que el navegador puede exponer al frontend
+CORS_EXPOSE_HEADERS = [
+	'Content-Type',
+	'X-CSRFToken',
 ]
 
 # ============================================
@@ -67,9 +99,9 @@ INSTALLED_APPS = [
 	'django.contrib.staticfiles',
 	
 	# Third Party Apps - ORDEN IMPORTANTE
+	'corsheaders',  # CORS debe ir primero
 	'rest_framework',
 	'rest_framework_simplejwt',
-	'corsheaders',
 	'django_filters',
 	
 	# Local Apps
@@ -79,8 +111,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
 	'django.middleware.security.SecurityMiddleware',
 	'whitenoise.middleware.WhiteNoiseMiddleware',
+	'corsheaders.middleware.CorsMiddleware',  # CORS ANTES de CommonMiddleware
 	'django.contrib.sessions.middleware.SessionMiddleware',
-	'corsheaders.middleware.CorsMiddleware',
 	'django.middleware.common.CommonMiddleware',
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -398,7 +430,7 @@ if not DEBUG:
 	X_FRAME_OPTIONS = 'DENY'
 	
 	SECURE_HSTS_SECONDS = 0
-	SECURE_HSTS_INCLUDE_SUBDOMAINS =False
+	SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 	SECURE_HSTS_PRELOAD = False
 	
 	SECURE_REFERRER_POLICY = 'same-origin'
@@ -443,7 +475,10 @@ ADMIN_SITE_HEADER = "PRAGMA Backend Administration"
 ADMIN_SITE_TITLE = "PRAGMA Admin"
 ADMIN_INDEX_TITLE = "Bienvenido al Panel de Administración"
 
-# ============ CIFRADO AES-256 ============
+# ============================================
+# CIFRADO AES-256
+# ============================================
+
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', 'a' * 32).encode() if isinstance(os.getenv('ENCRYPTION_KEY', 'a' * 32), str) else os.getenv('ENCRYPTION_KEY', b'a' * 32)
 
 # Si es string, convertir a bytes (32 bytes = 256 bits)
@@ -467,6 +502,7 @@ if DEBUG:
 	print(f"DATABASE: {DATABASES['default']['ENGINE']}")
 	print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 	print(f"CORS_ALLOWED_ORIGINS: {len(CORS_ALLOWED_ORIGINS)} origin(s)")
+	print(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 	print(f"INSTALLED_APPS: {len(INSTALLED_APPS)} apps")
 	print(f"MIDDLEWARE: {len(MIDDLEWARE)} middleware(s)")
 	print("="*60 + "\n")
