@@ -30,3 +30,11 @@ PyYAML==6.0.1
 
 # Producción
 gunicorn==21.2.0
+
+# Testing
+pytest==7.4.0
+pytest-cov==4.1.0
+pytest-django==4.7.0
+
+# Seguridad / Criptografía
+cryptography==41.0.0
