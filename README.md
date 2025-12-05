@@ -7,10 +7,6 @@
 - **Cliente Godot**: donde el usuario juega escenarios.
 - **Base de datos cifrada**: almacenamiento seguro de datos sensibles.
 
-### Qué es Pragma
-
-Pragma simula situaciones generadoras de estrés (presentaciones, entrevistas, conflictos sociales) en un ambiente seguro. El usuario toma decisiones, recibe retroalimentación y el sistema analiza patrones de comportamiento para generar recomendaciones personalizadas.
-
 ### Características Principales
 
 - **Autenticación JWT**: acceso seguro sin exponer credenciales.  
