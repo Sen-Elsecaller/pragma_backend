@@ -30,12 +30,12 @@ ALLOWED_HOSTS = os.environ.get(
 
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    'http://localhost:3000,http://localhost:5173,https://pragmabackend-production.up.railway.app'
+    'http://localhost:3000,http://localhost:5173,https://pragmabackend-production.up.railway.app,https://html.itch.zone,https://itch.io'
 ).split(',')
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
 	'CORS_ALLOWED_ORIGINS', 
-	'http://localhost:3000,http://localhost:5173'
+	'http://localhost:3000,http://localhost:5173,https://html.itch.zone,https://itch.io'
 ).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
