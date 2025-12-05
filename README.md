@@ -6,7 +6,6 @@
 
 - **Cliente Godot**: donde el usuario juega escenarios.
 - **Base de datos cifrada**: almacenamiento seguro de datos sensibles.
-- **Dashboard web**: visualización de progreso y retroalimentación.
 
 ### Qué es Pragma
 
